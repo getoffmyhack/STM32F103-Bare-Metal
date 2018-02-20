@@ -126,7 +126,7 @@ serflash: $(BINDIR)/$(PROJECT).bin
 	$(SERFLASH) -b 230400 -w $(BINDIR)/$(PROJECT).bin -g 0 /dev/tty.usbserial-*
 
 debug: $(BINDIR)/$(PROJECT).bin
-	$(GDBPY) --command gdb/init $(BINDIR)/$(PROJECT).elf
+	$(GDBPY) --command $(BASEPATH)/gdb/debug.gdb $(BINDIR)/$(PROJECT).elf
 
 macros:
 	$(CC) $(GCFLAGS) -dM -E - < /dev/null
