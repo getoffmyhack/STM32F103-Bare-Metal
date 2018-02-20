@@ -20,7 +20,7 @@ The gdb directory contains gbd command files used for debugging and flashing.
 
 ## Example Projects
 
-### 01 Hello World/
+### [01 Hello World/](01_Hello_World)
 
 The first project being the ubiquitous "Hello World" as a "Blinken Light".
 
