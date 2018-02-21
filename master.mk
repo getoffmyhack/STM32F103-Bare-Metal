@@ -20,8 +20,8 @@ FLASHTOOLPATH	= /opt/local/bin
 ##### 
 ##### See https://github.com/getoffmyhack/STM32-CMSIS
 
-CMSISBASE 		= /usr/local/arm
-CMSISINC 		= $(CMSISBASE)/CMSIS/include
+CMSISBASE 		= ../CMSIS
+CMSISINC 		= $(CMSISBASE)/include
 
 # Device specific, change to either IF-THEN or makefile includes
 DEVICEINC 		= $(CMSISBASE)/Device/STM32F1xx/include
