@@ -38,4 +38,10 @@ The gdb directory contains gbd command files used for debugging and flashing.
 
 The first project being the ubiquitous "Hello World" as a "Blinken Light".
 
+#### [02 Warp Speed/](02_Warp_Speed)
+
+Extends "Hello World" to configure the clock to run at max speed (72MHz.)
+
+
+
 [blue pill]: http://wiki.stm32duino.com/index.php?title=Blue_Pill
