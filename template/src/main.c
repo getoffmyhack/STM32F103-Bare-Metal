@@ -95,9 +95,17 @@ void init_clock(void)
     FLASH->ACR      |= FLASH_ACR_LATENCY_2; // Two wait states, per datasheet
     RCC->CFGR       |= RCC_CFGR_PPRE1_2;    // prescale AHB1 = HCLK/2
     RCC->CR         |= RCC_CR_HSEON;        // enable HSE clock
+    
+    // wait for the HSEREADY flag
+    while( !(RCC->CR & RCC_CR_HSERDY) );
+    
     RCC->CFGR       |= RCC_CFGR_PLLSRC;     // set PLL source to HSE
     RCC->CFGR       |= RCC_CFGR_PLLMULL9;   // multiply by 9
     RCC->CR         |= RCC_CR_PLLON;        // enable the PLL
+    
+    // wait for the PLLRDY flag
+    while( !(RCC->CR & RCC_CR_PLLRDY) );
+    
     RCC->CFGR       |= RCC_CFGR_SW_PLL;     // set clock source to pll
 }
 
