@@ -72,7 +72,7 @@ void SysTick_Handler(void)
 void init_systick(void)
 {
     // configure SysTick timer
-//    SystemCoreClockUpdate();                    // calculate the SYSCLOCK value
+    SystemCoreClockUpdate();                    // calculate the SYSCLOCK value
     int tick_time = SystemCoreClock/1000;       // Generate interrupt each 1 ms
     SysTick_Config(tick_time);                  // Configure systick timer
 }
