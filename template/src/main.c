@@ -72,7 +72,6 @@ void SysTick_Handler(void)
 void init_systick(void)
 {
     // configure SysTick timer
-    SystemCoreClockUpdate();                    // calculate the SYSCLOCK value
     int tick_time = SystemCoreClock/1000;       // Generate interrupt each 1 ms
     SysTick_Config(tick_time);                  // Configure systick timer
 }
@@ -107,6 +106,8 @@ void init_clock(void)
     while( !(RCC->CR & RCC_CR_PLLRDY) );
     
     RCC->CFGR       |= RCC_CFGR_SW_PLL;     // set clock source to pll
+
+    SystemCoreClockUpdate();                // calculate the SYSCLOCK value
 }
 
 /*--------------------------------------------------------------------------*\
