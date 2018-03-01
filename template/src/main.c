@@ -62,7 +62,8 @@ void SysTick_Handler(void)
  
  Function:      init_systick()
  
- Description:   initalizes SysTick timer to 1ms / tick
+ Description:   initalizes SysTick timer to 1ms / tick, assumes
+                SystemCoreClockUpdate() has been called post RCC config.
  
  Parameters:    void
  Returns:       void
@@ -71,7 +72,6 @@ void SysTick_Handler(void)
 
 void init_systick(void)
 {
-    // configure SysTick timer
     int tick_time = SystemCoreClock/1000;       // Generate interrupt each 1 ms
     SysTick_Config(tick_time);                  // Configure systick timer
 }
@@ -94,19 +94,15 @@ void init_clock(void)
     FLASH->ACR      |= FLASH_ACR_LATENCY_2; // Two wait states, per datasheet
     RCC->CFGR       |= RCC_CFGR_PPRE1_2;    // prescale AHB1 = HCLK/2
     RCC->CR         |= RCC_CR_HSEON;        // enable HSE clock
-    
-    // wait for the HSEREADY flag
-    while( !(RCC->CR & RCC_CR_HSERDY) );
+    while( !(RCC->CR & RCC_CR_HSERDY) );    // wait for the HSEREADY flag
     
     RCC->CFGR       |= RCC_CFGR_PLLSRC;     // set PLL source to HSE
     RCC->CFGR       |= RCC_CFGR_PLLMULL9;   // multiply by 9
     RCC->CR         |= RCC_CR_PLLON;        // enable the PLL
-    
-    // wait for the PLLRDY flag
-    while( !(RCC->CR & RCC_CR_PLLRDY) );
+    while( !(RCC->CR & RCC_CR_PLLRDY) );    // wait for the PLLRDY flag
     
     RCC->CFGR       |= RCC_CFGR_SW_PLL;     // set clock source to pll
-
+    
     SystemCoreClockUpdate();                // calculate the SYSCLOCK value
 }
 
