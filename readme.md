@@ -42,6 +42,9 @@ The first project being the ubiquitous "Hello World" as a "Blinken Light".
 
 Extends "Hello World" to configure the clock to run at max speed (72MHz.)
 
+#### [03 Tick Tock/](03_Tick_Tock)
+
+This extends the previous projects implementing the Cortex SysTick timer in order to create a 1ms interrupt.  This interrupt will become the clock used to time the LED heartbeat.  This becomes the code for the project template.
 
 
 [blue pill]: http://wiki.stm32duino.com/index.php?title=Blue_Pill
