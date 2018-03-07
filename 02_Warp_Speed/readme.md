@@ -23,7 +23,8 @@ The init_clock() function performs the following steps:
 7. Enable the PLL. *(Ref. Manual Sec. 7)*
 8. Wait until the PLL is ready.
 9. Set clock source to use PLL. *(Ref. Manual Sec. 7)*
-10. Update the SystemCoreClock variable.
+10. Wait until PLL becomes clock source. *(Ref. Manual Sec. 7)*
+11. Update the SystemCoreClock variable.
 
 ```
 void init_clock(void)
@@ -40,8 +41,10 @@ void init_clock(void)
     while( !(RCC->CR & RCC_CR_PLLRDY) );    // 8. wait for the PLLRDY flag
     
     RCC->CFGR       |= RCC_CFGR_SW_PLL;     // 9. set clock source to pll
+
+    while( !(RCC->CFGR & RCC_CFGR_SWS_PLL) );    // 10. wait for PLL as source
     
-    SystemCoreClockUpdate();                // 10. calculate the SYSCLOCK value
+    SystemCoreClockUpdate();                // 11. calculate the SYSCLOCK value
 }
 
 ```

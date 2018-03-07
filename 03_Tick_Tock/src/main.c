@@ -102,6 +102,8 @@ void init_clock(void)
     while( !(RCC->CR & RCC_CR_PLLRDY) );    // wait for the PLLRDY flag
     
     RCC->CFGR       |= RCC_CFGR_SW_PLL;     // set clock source to pll
+
+    while( !(RCC->CFGR & RCC_CFGR_SWS_PLL) );    // wait for PLL as source
     
     SystemCoreClockUpdate();                // calculate the SYSCLOCK value
 }
