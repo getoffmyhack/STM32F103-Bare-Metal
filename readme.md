@@ -46,5 +46,9 @@ Extends "Hello World" to configure the clock to run at max speed (72MHz.)
 
 This extends the previous projects implementing the Cortex SysTick timer in order to create a 1ms interrupt.  This interrupt will become the clock used to time the LED heartbeat.  This becomes the code for the project template.
 
+#### [04 USART/](04_USART)
+
+This project works as a simple serial test platform using USART1 to transmit and receive data by implementing a *chargen* and *echo* service.
+
 
 [blue pill]: http://wiki.stm32duino.com/index.php?title=Blue_Pill
