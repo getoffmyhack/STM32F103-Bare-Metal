@@ -28,10 +28,11 @@
 #define USART_BAUD          230400
 #define USART_BUFFER_SIZE   16
 
-
 // output defines
 #define OUTPUT_MODE_KEY         0x03            // control-c
 #define OUTPUT_CHARGEN_LENGTH   72
+#define CHARGEN_STRING_LENGTH   95
+
 
 // delay defines
 #define LED_DELAY_MS        150
@@ -39,8 +40,7 @@
 
 /*********************** global variables           *************************/
 
-// output global vars
-
+// output mode global vars
 typedef enum
 {
     output_chargen = 0, output_echo
@@ -50,7 +50,6 @@ output_mode_t       output_mode         = output_chargen;
 volatile uint8_t    output_mode_changed = 1;
 
 // heartbeat LED global vars
-
 typedef enum
 {
     led_idle = 0, led_on, led_off
@@ -61,7 +60,6 @@ volatile led_state_t    led_state_next  = led_on;
 volatile uint16_t       led_delay_count = 0;
 
 // usart global vars
-
 typedef enum
 {
     usart_idle = 0, usart_send
@@ -79,9 +77,19 @@ volatile rx_buffer_t    uart_buffer         = { {0}, 0, 0 };
 
 /*********************** function prototypes        *************************/
 
-void bufferchar (uint8_t c);
-void put_char   (uint8_t byte);
+void init_hardware(void);
+void init_systick(void);
+void init_clock(void);
+void init_led(void);
+void init_usart(uint32_t baudrate);
 
+void    buffer_char(uint8_t c);
+void    put_char(uint8_t byte);
+int     put_line(char * string);
+uint8_t get_char(uint8_t *c);
+
+void led_heartbeat(void);
+void chargen(void);
 
 
 /*********************** ISR definitions            *************************/
@@ -153,7 +161,7 @@ void USART1_IRQHandler(void)
     {
         if(output_mode == output_echo)
         {
-            bufferchar(in_char);
+            buffer_char(in_char);
         }
     }
 }
@@ -302,12 +310,12 @@ void put_char(uint8_t byte)
 
 /*--------------------------------------------------------------------------*\
  
- Function:
+ Function:      put_line()
  
- Description:
+ Description:   outputs passed in string and ends with newline
  
- Parameters:    void
- Returns:       void
+ Parameters:    char * string   - string to output
+ Returns:       int             - number of chars output
  
 \*--------------------------------------------------------------------------*/
 
@@ -328,16 +336,17 @@ int put_line(char * string)
 
 /*--------------------------------------------------------------------------*\
  
- Function:
+ Function:      buffer_char()
  
- Description:
+ Description:   places new character in ring buffer.  If buffer is full,
+                quietly discard character.
  
- Parameters:    void
+ Parameters:    uint8_t c   - character to buffer
  Returns:       void
  
 \*--------------------------------------------------------------------------*/
 
-void bufferchar(uint8_t c)
+void buffer_char(uint8_t c)
 {
     int i = (uart_buffer.head_pos + 1) % USART_BUFFER_SIZE;
     
@@ -350,12 +359,12 @@ void bufferchar(uint8_t c)
 
 /*--------------------------------------------------------------------------*\
  
- Function:
+ Function:      get_char()
  
- Description:
+ Description:   gets next character from ring buffer
  
- Parameters:    void
- Returns:       void
+ Parameters:    uint8_t *c  - pointer to memory to put character
+ Returns:       uint8_t     - 0 if buffer empty, 1 if char available
  
 \*--------------------------------------------------------------------------*/
 
@@ -406,23 +415,25 @@ void led_heartbeat(void)
 
 /*--------------------------------------------------------------------------*\
  
- Function:
+ Function:      chargen()
  
- Description:
+ Description:   implements chargen service
+                https://en.wikipedia.org/wiki/Character_Generator_Protocol
  
  Parameters:    void
  Returns:       void
  
 \*--------------------------------------------------------------------------*/
 
-void chargen()
+void chargen(void)
 {
     static uint8_t  chargen_count           = 0;
     static uint8_t  chargen_start_index     = 0;
     static uint8_t  chargen_string_index    = 0;
-    const  uint8_t  chargen_string_length   = 95;
+    
+    // this is an 'escaped' string: the " \ chars are escaped
     const char      chargen_string[]        =
-    " !\"#$\%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
+    " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
     
     switch (usart_state)
     {
@@ -430,21 +441,49 @@ void chargen()
             usart_state = usart_idle;
 
             put_char(chargen_string[chargen_string_index]);
-            chargen_string_index = (chargen_string_index + 1) % chargen_string_length;
+            chargen_string_index = (chargen_string_index + 1) % CHARGEN_STRING_LENGTH;
             
             chargen_count = (chargen_count + 1) % OUTPUT_CHARGEN_LENGTH;
             if(chargen_count == 0)
             {
                 put_char('\n');
-                chargen_start_index = (chargen_start_index + 1) % chargen_string_length;
+                chargen_start_index = (chargen_start_index + 1) % CHARGEN_STRING_LENGTH;
                 chargen_string_index = chargen_start_index;
             }
-            
             break;
             
         default:
             break;
             
+    }
+}
+
+/*--------------------------------------------------------------------------*\
+ 
+ Function:      echo()
+ 
+ Description:   implements simlpe echo service
+                https://en.wikipedia.org/wiki/Echo_Protocol
+ 
+ Parameters:    void
+ Returns:       void
+ 
+\*--------------------------------------------------------------------------*/
+
+void echo(void)
+{
+    uint8_t in_char;
+
+    if(get_char(&in_char))
+    {
+        switch(in_char)
+        {
+            case 0x0D:
+                put_char('\n');
+                break;
+            default:
+                put_char(in_char);
+        }
     }
 }
 
@@ -461,8 +500,6 @@ void chargen()
 
 int main(void) 
 {
-    uint8_t in_char;
-
     init_hardware();
     put_char('\n');
 
@@ -478,7 +515,6 @@ int main(void)
                 put_line("mode: chargen - cntl-c to change");
                 output_mode_changed = 0;
             }
-                
             chargen();
             break;
             
@@ -488,20 +524,9 @@ int main(void)
                 put_line("mode: echo    - cntl-c to change");
                 output_mode_changed = 0;
             }
-                
-            if(get_char(&in_char))
-            {
-                switch(in_char)
-                {
-                    case 0x0D:
-                        put_char('\n');
-                        break;
-                    default:
-                        put_char(in_char);
-                }
-            }
+            echo();
+            break;
         }
-        
     }
     
     return 0;
