@@ -28,6 +28,11 @@
 /*********************** global variables           *************************/
 
 // heartbeat LED global vars
+typedef enum
+{
+    led_idle = 0, led_on, led_off
+} led_state_t;
+
 volatile led_state_t    led_state       = led_idle;
 volatile led_state_t    led_state_next  = led_on;
 volatile uint16_t       led_delay_count = 0;
