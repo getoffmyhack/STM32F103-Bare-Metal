@@ -37,6 +37,14 @@ volatile led_state_t    led_state       = led_idle;
 volatile led_state_t    led_state_next  = led_on;
 volatile uint16_t       led_delay_count = 0;
 
+/*********************** function prototypes        *************************/
+
+void init_systick(void);
+void init_clock(void);
+void init_led(void);
+void init_hardware(void);
+void led_heartbeat(void);
+
 /*********************** ISR definitions            *************************/
 
 /*--------------------------------------------------------------------------*\
