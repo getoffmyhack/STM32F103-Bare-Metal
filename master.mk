@@ -84,6 +84,7 @@ LDFLAGS	+= -mcpu=$(ARMCPU)
 LDFLAGS += --specs=nosys.specs
 LDFLAGS += --specs=nano.specs
 LDFLAGS += -lc
+LDFLAGS += -Wl,-Map=$(OBJDIR)/$(PROJECT).map
 #LDFLAGS += -lrdimon
 
 ################################################################################
